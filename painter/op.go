@@ -63,14 +63,14 @@ func (op *Rectangle) Do(t screen.Texture) bool {
 
 // TFigure structure
 type TFigure struct {
-	X, Y  int
-	COLOR color.RGBA
+	X, Y int
 }
 
 // Draws TFigure on the screen
 func (op *TFigure) Do(t screen.Texture) bool {
-	t.Fill(image.Rect(op.X-150, op.Y+100, op.X+150, op.Y), op.COLOR, draw.Src)
-	t.Fill(image.Rect(op.X-45, op.Y+45, op.X+45, op.Y+200), op.COLOR, draw.Src)
+	c := color.RGBA{0, 0, 255, 1}
+	t.Fill(image.Rect(op.X-150, op.Y+100, op.X+150, op.Y), c, draw.Src)
+	t.Fill(image.Rect(op.X-45, op.Y+45, op.X+45, op.Y+200), c, draw.Src)
 	return false
 }
 
