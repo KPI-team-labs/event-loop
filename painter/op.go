@@ -8,6 +8,8 @@ import (
 	"golang.org/x/image/draw"
 )
 
+var figures []*TFigure
+
 // Operation змінює вхідну текстуру.
 type Operation interface {
 	// Do виконує зміну операції, повертаючи true, якщо текстура вважається готовою для відображення.
@@ -82,8 +84,8 @@ type Move struct {
 
 func (op *Move) Do(t screen.Texture) bool {
 	for i := range op.Figures {
-		op.Figures[i].X += op.X
-		op.Figures[i].Y += op.Y
+		op.Figures[i].X = op.X
+		op.Figures[i].Y = op.Y
 	}
 	return false
 }

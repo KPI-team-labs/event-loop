@@ -14,8 +14,6 @@ import (
 type Parser struct {
 }
 
-var figures []*painter.TFigure
-
 func (p *Parser) Parse(in io.Reader) ([]painter.Operation, error) {
 	argsBytes, err := ioutil.ReadAll(in)
 	var res []painter.Operation
@@ -52,7 +50,6 @@ func CommandHandler(command string) painter.Operation {
 		"figure": TwoArgsHandler,
 		"move":   TwoArgsHandler,
 		"reset": func(command string) painter.Operation {
-			figures = nil
 			return painter.OperationFunc(painter.ResetScreen)
 		},
 	}
@@ -62,7 +59,6 @@ func CommandHandler(command string) painter.Operation {
 			return commands[commandStr](command)
 		}
 	}
-
 	fmt.Printf("Command %s does not exist\n", command)
 	return nil
 }
@@ -101,12 +97,10 @@ func TwoArgsHandler(command string) painter.Operation {
 			X: xCordPoint,
 			Y: yCordPoint,
 		}
-		figures = append(figures, tCommand.(*painter.TFigure))
 	} else if commandType == "move" {
 		tCommand = &painter.Move{
-			X:       xCordPoint,
-			Y:       yCordPoint,
-			Figures: figures,
+			X: xCordPoint,
+			Y: yCordPoint,
 		}
 	}
 
