@@ -51,14 +51,13 @@ func GreenFill(t screen.Texture) {
 
 // Rectangle структура прямокутника
 type Rectangle struct {
-	startPoint image.Point
-	endPoint   image.Point
+	X1, Y1, X2, Y2 int
 }
 
 // Draws rectangle
 func (op *Rectangle) Do(t screen.Texture) bool {
 	rect_color := color.Black
-	t.Fill(image.Rect(op.startPoint.X, op.startPoint.Y, op.endPoint.X, op.endPoint.Y), rect_color, screen.Src)
+	t.Fill(image.Rect(op.X1, op.Y1, op.X2, op.Y2), rect_color, screen.Src)
 	return false
 }
 
