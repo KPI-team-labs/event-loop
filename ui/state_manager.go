@@ -2,6 +2,7 @@ package ui
 
 import (
 	"github.com/roman-mazur/architecture-lab-3/painter"
+	"image/color"
 )
 
 type Uistate struct {
@@ -56,9 +57,11 @@ func (u *Uistate) BackgroundRectangle(x1, y1, x2, y2 int) {
 	}
 }
 
-func (u *Uistate) AddFigure(x, y int) {
+func (u *Uistate) AddFigure(x, y int, rgba color.RGBA) {
 	figure := &painter.TFigure{
-		X: x, Y: y,
+		X:     x,
+		Y:     y,
+		Color: rgba,
 	}
 	u.shapeArray = append(u.shapeArray, figure)
 }
