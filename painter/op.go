@@ -65,7 +65,9 @@ func (op *Rectangle) Do(t screen.Texture) bool {
 
 // TFigure structure
 type TFigure struct {
-	X, Y int
+	X     int
+	Y     int
+	Color color.RGBA
 }
 
 // Draws TFigure on the screen
@@ -83,9 +85,10 @@ type Move struct {
 }
 
 func (op *Move) Do(t screen.Texture) bool {
-	for i := range op.Figures {
-		op.Figures[i].X = op.X
-		op.Figures[i].Y = op.Y
+	for _, fig := range op.Figures {
+		fig.X += op.X
+		fig.Y += op.Y
+		fig.Do(t)
 	}
 	return false
 }
