@@ -53,32 +53,31 @@ func BlackFill(t screen.Texture) {
 	t.Fill(t.Bounds(), color.Black, screen.Src)
 }
 
-// TFigure structure .
+// Rectangle структура прямокутника
+func Rectangle(x1, y1, x2, y2 int) OperationFunc {
+	return func(t screen.Texture) {
+		t.Fill(image.Rect(x1, y1, x2, y2), color.Black, screen.Src)
+	}
+}
+
+// TFigure structure
 type TFigure struct {
 	X int
 	Y int
 }
 
-// Rectangle drawing operation.
-func Rectangle(x1, y1, x2, y2 int) OperationFunc {
-	return func(t screen.Texture) {
-		rect := image.Rect(x1, y1, x2, y2)
-		t.Fill(rect, color.Black, screen.Src)
-	}
-}
-
-// Drawfigure returns function that draws.
+// Draws TFigure on the screen
 func (f *TFigure) Drawfigure() OperationFunc {
-	blueColor := color.RGBA{0, 0, 255, 255} // Adjusted alpha value to 255 for proper color representation
+	c := color.RGBA{0, 0, 255, 1}
 	return func(t screen.Texture) {
-		upperRect := image.Rect(f.X-150, f.Y-100, f.X+150, f.Y)
-		t.Fill(upperRect, blueColor, screen.Src)
-		lowerRect := image.Rect(f.X-50, f.Y, f.X+50, f.Y+100)
-		t.Fill(lowerRect, blueColor, screen.Src)
+		t.Fill(image.Rect(f.X-150, f.Y-100, f.X+150, f.Y), c, screen.Src)
+		t.Fill(image.Rect(f.X-50, f.Y, f.X+50, f.Y+100), c, screen.Src)
 	}
+
 }
 
-// Moves figure.
+// Structure for moving pictures
+
 func (f *TFigure) MoveFigure(x, y int) {
 	f.X += x
 	f.Y += y
