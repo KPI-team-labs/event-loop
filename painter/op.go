@@ -5,9 +5,8 @@ import (
 	"image/color"
 
 	"golang.org/x/exp/shiny/screen"
+	"golang.org/x/image/draw"
 )
-
-var figures []*TFigure
 
 // Operation змінює вхідну текстуру.
 type Operation interface {
@@ -49,36 +48,45 @@ func WhiteFill(t screen.Texture) {
 func GreenFill(t screen.Texture) {
 	t.Fill(t.Bounds(), color.RGBA{G: 0xff, A: 0xff}, screen.Src)
 }
-func BlackFill(t screen.Texture) {
-	t.Fill(t.Bounds(), color.Black, screen.Src)
-}
 
 // Rectangle структура прямокутника
-func Rectangle(x1, y1, x2, y2 int) OperationFunc {
-	return func(t screen.Texture) {
-		t.Fill(image.Rect(x1, y1, x2, y2), color.Black, screen.Src)
-	}
+type Rectangle struct {
+	StartPoint image.Point
+	EndPoint   image.Point
+}
+
+func (op *Rectangle) Do(t screen.Texture) bool {
+	c := color.Black
+	t.Fill(image.Rect(op.StartPoint.X, op.StartPoint.Y, op.EndPoint.X, op.EndPoint.Y), c, screen.Src)
+	return false
 }
 
 // TFigure structure
 type TFigure struct {
-	X int
-	Y int
+	PointCenter image.Point
 }
 
-// Draws TFigure on the screen
-func (f *TFigure) Drawfigure() OperationFunc {
-	c := color.RGBA{0, 0, 255, 1}
-	return func(t screen.Texture) {
-		t.Fill(image.Rect(f.X-150, f.Y-100, f.X+150, f.Y), c, screen.Src)
-		t.Fill(image.Rect(f.X-50, f.Y, f.X+50, f.Y+100), c, screen.Src)
+func (op *TFigure) Do(t screen.Texture) bool {
+	c := color.RGBA{R: 0, G: 0, B: 255, A: 1}
+	t.Fill(image.Rect(op.PointCenter.X-150, op.PointCenter.Y-100, op.PointCenter.X+150, op.PointCenter.Y), c, draw.Src)
+	t.Fill(image.Rect(op.PointCenter.X-50, op.PointCenter.Y, op.PointCenter.X+50, op.PointCenter.Y+100), c, draw.Src)
+	return false
+}
+
+type MoveFigures struct {
+	X             int
+	Y             int
+	TFiguresArray []*TFigure
+}
+
+func (op *MoveFigures) Do(t screen.Texture) bool {
+	for i := range op.TFiguresArray {
+		op.TFiguresArray[i].PointCenter.X += op.X
+		op.TFiguresArray[i].PointCenter.Y += op.Y
 	}
-
+	return false
 }
 
-// Structure for moving pictures
-
-func (f *TFigure) MoveFigure(x, y int) {
-	f.X += x
-	f.Y += y
+func Reset(t screen.Texture) {
+	t.Fill(t.Bounds(), color.Black, screen.Src)
 }
