@@ -22,6 +22,10 @@ func (f *Uistate) SetRect(op painter.OperationFunc) {
 	f.Rect = op
 }
 
+func (f *Uistate) AddTFigure(op *painter.TFigure) {
+	f.Figures = append(f.Figures, op)
+}
+
 func (f *Uistate) Reset() {
 	f.backgroundColor = painter.OperationFunc(painter.BlackFill)
 	f.Rect = painter.Rectangle(0, 0, 0, 0)

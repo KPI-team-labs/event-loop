@@ -1,110 +1,109 @@
 package lang
 
 import (
-	"fmt"
+	"bufio"
+	"errors"
 	"github.com/roman-mazur/architecture-lab-3/painter"
-	"golang.org/x/exp/shiny/screen"
 	"io"
-	"io/ioutil"
 	"strconv"
 	"strings"
 )
 
-// Parser уміє прочитати дані з вхідного io.Reader та повернути список операцій представлені вхідним скриптом.
 type Parser struct {
+	uistate *Uistate
+}
+
+func ParserWithState(state *Uistate) *Parser {
+	return &Parser{uistate: state}
 }
 
 func (p *Parser) Parse(in io.Reader) ([]painter.Operation, error) {
-	argsBytes, err := ioutil.ReadAll(in)
 	var res []painter.Operation
 
-	if err != nil {
+	scanner := bufio.NewScanner(in)
+
+	for scanner.Scan() {
+		args := strings.Split(scanner.Text(), ",")
+		if len(args) == 0 {
+			continue
+		}
+
+		for _, arg := range args {
+			commands := strings.Fields(arg)
+
+			switch commands[0] {
+			case "white":
+				p.uistate.SetBgColor(painter.OperationFunc(painter.WhiteFill))
+			case "green":
+				p.uistate.SetBgColor(painter.OperationFunc(painter.GreenFill))
+			case "bgrect":
+				if len(commands) != 5 {
+					return nil, errors.New("Invalid number of arguments for bgrect instruction.")
+				}
+
+				startXPoint, errXstart := strconv.ParseFloat(commands[1], 64)
+				startYPoint, errYstart := strconv.ParseFloat(commands[2], 64)
+				endXPoint, errXend := strconv.ParseFloat(commands[3], 64)
+				endYPoint, errYend := strconv.ParseFloat(commands[4], 64)
+
+				if errXstart != nil || errYstart != nil || errXend != nil || errYend != nil {
+					return nil, errors.New("Invalid arguments for bgrect instruction.")
+				}
+
+				x1 := int(startXPoint * 800)
+				y1 := int(startYPoint * 800)
+				x2 := int(endXPoint * 800)
+				y2 := int(endYPoint * 800)
+
+				p.uistate.Rect = painter.Rectangle(x1, y1, x2, y2)
+			case "figure":
+				if len(commands) != 3 {
+					return nil, errors.New("Invalid number of arguments for figure instruction.")
+				}
+
+				xCord, errXpoint := strconv.ParseFloat(commands[1], 64)
+				yCord, errYpoint := strconv.ParseFloat(commands[2], 64)
+
+				if errXpoint != nil || errYpoint != nil {
+					return nil, errors.New("Invalid arguments for figure instruction.")
+				}
+
+				xCordPoint := int(xCord * 800)
+				yCordPoint := int(yCord * 800)
+
+				p.uistate.AddTFigure(&painter.TFigure{
+					X: xCordPoint,
+					Y: yCordPoint,
+				})
+			case "move":
+				if len(commands) != 3 {
+					return nil, errors.New("Invalid number of arguments for move instruction.")
+				}
+
+				xMove, errXmove := strconv.ParseFloat(commands[1], 64)
+				yMove, errYmove := strconv.ParseFloat(commands[2], 64)
+
+				if errXmove != nil || errYmove != nil {
+					return nil, errors.New("Invalid arguments for move instruction.")
+				}
+
+				xMoveInt := int(xMove * 800)
+				yMoveInt := int(yMove * 800)
+
+				p.uistate.MoveFigures(xMoveInt, yMoveInt)
+			case "update":
+				res = append(res, p.uistate.Update()...)
+			case "reset":
+				p.uistate.Reset()
+			default:
+				return nil, errors.New("Invalid command.")
+			}
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
 
-	argsStr := string(argsBytes)
-	args := strings.Split(argsStr, ",")
-
-	for _, arg := range args {
-		op := CommandHandler(strings.TrimSpace(arg))
-		if op != nil {
-			res = append(res, op)
-		}
-	}
-
 	return res, nil
-}
-
-func CommandHandler(command string) painter.Operation {
-	commands := map[string]func(command string) painter.Operation{
-		"white": func(command string) painter.Operation {
-			return painter.OperationFunc(painter.WhiteFill)
-		},
-		"green": func(command string) painter.Operation {
-			return painter.OperationFunc(painter.GreenFill)
-		},
-		"update": func(command string) painter.Operation {
-			return painter.UpdateOp
-		},
-		"bgrect": BgRectHandler,
-		"figure": TwoArgsHandler,
-		"move":   TwoArgsHandler,
-		"reset": func(command string) painter.Operation {
-			return painter.OperationFunc(painter.ResetScreen)
-		},
-	}
-
-	for commandStr := range commands {
-		if strings.HasPrefix(command, commandStr) {
-			return commands[commandStr](command)
-		}
-	}
-	fmt.Printf("Command %s does not exist\n", command)
-	return nil
-}
-
-func BgRectHandler(command string) painter.Operation {
-	args := strings.Split(command, " ")
-	startX := args[1]
-	startXPoint, _ := strconv.Atoi(startX)
-	startY := args[2]
-	startYPoint, _ := strconv.Atoi(startY)
-	endX := args[3]
-	endXPoint, _ := strconv.Atoi(endX)
-	endY := args[4]
-	endYPoint, _ := strconv.Atoi(endY)
-	rect := &painter.Rectangle{
-		X1: startXPoint,
-		Y1: startYPoint,
-		X2: endXPoint,
-		Y2: endYPoint,
-	}
-	return painter.OperationFunc(func(t screen.Texture) {
-		rect.Do(t)
-	})
-}
-
-func TwoArgsHandler(command string) painter.Operation {
-	args := strings.Split(command, " ")
-	commandType := args[0]
-	xCord := args[1]
-	xCordPoint, _ := strconv.Atoi(xCord)
-	yCord := args[2]
-	yCordPoint, _ := strconv.Atoi(yCord)
-	var tCommand painter.Operation
-	if commandType == "figure" {
-		tCommand = &painter.TFigure{
-			X: xCordPoint,
-			Y: yCordPoint,
-		}
-	} else if commandType == "move" {
-		tCommand = &painter.Move{
-			X: xCordPoint,
-			Y: yCordPoint,
-		}
-	}
-
-	return painter.OperationFunc(func(t screen.Texture) {
-		tCommand.Do(t)
-	})
 }

@@ -14,7 +14,8 @@ func main() {
 
 		// Потрібні для частини 2.
 		opLoop painter.Loop // Цикл обробки команд.
-		parser lang.Parser  // Парсер команд.
+		state  = lang.NewUistate()
+		parser = lang.ParserWithState(state) // Парсер команд.
 	)
 
 	//pv.Debug = true
@@ -24,7 +25,7 @@ func main() {
 	opLoop.Receiver = &pv
 
 	go func() {
-		http.Handle("/", lang.HttpHandler(&opLoop, &parser))
+		http.Handle("/", lang.HttpHandler(&opLoop, parser))
 		_ = http.ListenAndServe("localhost:17000", nil)
 	}()
 
