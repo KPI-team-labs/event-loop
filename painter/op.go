@@ -5,7 +5,6 @@ import (
 	"image/color"
 
 	"golang.org/x/exp/shiny/screen"
-	"golang.org/x/image/draw"
 )
 
 var figures []*TFigure
@@ -50,49 +49,37 @@ func WhiteFill(t screen.Texture) {
 func GreenFill(t screen.Texture) {
 	t.Fill(t.Bounds(), color.RGBA{G: 0xff, A: 0xff}, screen.Src)
 }
-
-// Rectangle структура прямокутника
-type Rectangle struct {
-	X1, Y1, X2, Y2 int
+func BlackFill(t screen.Texture) {
+	t.Fill(t.Bounds(), color.Black, screen.Src)
 }
 
-// Draws rectangle
-func (op *Rectangle) Do(t screen.Texture) bool {
-	rect_color := color.Black
-	t.Fill(image.Rect(op.X1, op.Y1, op.X2, op.Y2), rect_color, screen.Src)
-	return false
-}
-
-// TFigure structure
+// TFigure structure .
 type TFigure struct {
-	X     int
-	Y     int
-	Color color.RGBA
+	X int
+	Y int
 }
 
-// Draws TFigure on the screen
-func (op *TFigure) Do(t screen.Texture) bool {
-	c := color.RGBA{0, 0, 255, 1}
-	t.Fill(image.Rect(op.X-150, op.Y+100, op.X+150, op.Y), c, draw.Src)
-	t.Fill(image.Rect(op.X-45, op.Y+45, op.X+45, op.Y+200), c, draw.Src)
-	return false
-}
-
-// Structure for moving pictures
-type Move struct {
-	X, Y    int
-	Figures []*TFigure
-}
-
-func (op *Move) Do(t screen.Texture) bool {
-	for _, fig := range op.Figures {
-		fig.X += op.X
-		fig.Y += op.Y
-		fig.Do(t)
+// Rectangle drawing operation.
+func Rectangle(x1, y1, x2, y2 int) OperationFunc {
+	return func(t screen.Texture) {
+		rect := image.Rect(x1, y1, x2, y2)
+		t.Fill(rect, color.Black, screen.Src)
 	}
-	return false
 }
 
-func ResetScreen(t screen.Texture) {
-	t.Fill(t.Bounds(), color.Black, draw.Src)
+// Drawfigure returns function that draws.
+func (f *TFigure) Drawfigure() OperationFunc {
+	blueColor := color.RGBA{0, 0, 255, 255} // Adjusted alpha value to 255 for proper color representation
+	return func(t screen.Texture) {
+		upperRect := image.Rect(f.X-150, f.Y-100, f.X+150, f.Y)
+		t.Fill(upperRect, blueColor, screen.Src)
+		lowerRect := image.Rect(f.X-50, f.Y, f.X+50, f.Y+100)
+		t.Fill(lowerRect, blueColor, screen.Src)
+	}
+}
+
+// Moves figure.
+func (f *TFigure) MoveFigure(x, y int) {
+	f.X += x
+	f.Y += y
 }
