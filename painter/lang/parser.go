@@ -3,7 +3,7 @@ package lang
 import (
 	"bufio"
 	"errors"
-	"github.com/roman-mazur/architecture-lab-3/painter"
+	"github.com/KPI-team-labs/event-loop/painter"
 	"io"
 	"strconv"
 	"strings"

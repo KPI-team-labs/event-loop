@@ -1,7 +1,7 @@
 package lang
 
 import (
-	"github.com/roman-mazur/architecture-lab-3/painter"
+	"github.com/KPI-team-labs/event-loop/painter"
 )
 
 type Uistate struct {
