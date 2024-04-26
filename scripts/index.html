@@ -70,16 +70,16 @@
         const script2Btn = document.querySelector('#script-2');
 
         script1Btn.addEventListener('click', function() {
-            fetch('http://localhost:17000/?cmd=green, bgrect 0.01 0.01 0.99 0.99, update');
+            fetch('http://localhost:17000/?cmd=reset, green, bgrect 0.02 0.02 0.98 0.98, update');
         });
 
         script2Btn.addEventListener('click', function() {
-            let i = 1;
+            let i = 0;
             const intervalId = setInterval(() => {
-                if (i === 1) {
-                    fetch('http://localhost:17000/?cmd=white, figure 0.1 0.1, update');
-                } else if (i < 9) {
-                    fetch(`http://localhost:17000/?cmd=move 0.${i} 0.${i}, update`);
+                if (i === 0) {
+                    fetch('http://localhost:17000/?cmd=reset, white, figure 0.1 0.1, update');
+                } else if (i <= 9) {
+                    fetch(`http://localhost:17000/?cmd=move 0.1 0.1, update`);
                 } else {
                     clearInterval(intervalId);
                 }
