@@ -53,14 +53,39 @@
         <textarea name="commands" id="commands" cols="30" rows="10"></textarea>
         <button type="submit">Send</button>
     </form>
-<script>
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const commands = document.querySelector('#commands').value;
-        const query = commands.replace('\n', ', ');
-        fetch(`http://localhost:17000/?cmd=${query}`)
-    });
-</script>
+    <div>
+        <button id="script-1">Script 1</button>
+        <button id="script-2">Script 2</button>
+    </div>
+    <script>
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const commands = document.querySelector('#commands').value;
+            const query = commands.replace(/\n/g, ', ');
+            fetch(`http://localhost:17000/?cmd=${query}`)
+        });
+
+        const script1Btn = document.querySelector('#script-1');
+        const script2Btn = document.querySelector('#script-2');
+
+        script1Btn.addEventListener('click', function() {
+            fetch('http://localhost:17000/?cmd=green, bgrect 0.01 0.01 0.99 0.99, update');
+        });
+
+        script2Btn.addEventListener('click', function() {
+            let i = 1;
+            const intervalId = setInterval(() => {
+                if (i === 1) {
+                    fetch('http://localhost:17000/?cmd=white, figure 0.1 0.1, update');
+                } else if (i < 9) {
+                    fetch(`http://localhost:17000/?cmd=move 0.${i} 0.${i}, update`);
+                } else {
+                    clearInterval(intervalId);
+                }
+                i++;
+            }, 1000);
+        });
+    </script>
 </body>
 </html>
